@@ -5,19 +5,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Swim Training Docs</title>
-  <link rel="stylesheet" href="/css/base.css">
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            night: '#0b0f14',
+            lagoon: '#5eead4'
+          }
+        }
+      }
+    };
+  </script>
   <link rel="manifest" href="/manifest.webmanifest">
 </head>
-<body>
-  <header class="app-header">
-    <h1>Swim Training Docs</h1>
-    <nav>
-      <a href="#/dashboard">Dashboard</a>
-      <a href="#/sessions">Sessions</a>
-      <a href="#/import">Import</a>
-    </nav>
+<body class="min-h-screen bg-night text-slate-100">
+  <header class="sticky top-0 z-20 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-4 sm:px-6">
+      <h1 class="text-2xl font-semibold tracking-tight">Swim Training Docs</h1>
+      <nav class="flex items-center gap-2 text-sm font-medium">
+        <a class="rounded-lg px-3 py-2 text-slate-200 transition hover:bg-slate-800 hover:text-lagoon" href="#/dashboard">Dashboard</a>
+        <a class="rounded-lg px-3 py-2 text-slate-200 transition hover:bg-slate-800 hover:text-lagoon" href="#/sessions">Sessions</a>
+        <a class="rounded-lg px-3 py-2 text-slate-200 transition hover:bg-slate-800 hover:text-lagoon" href="#/import">Import</a>
+        <a class="rounded-lg px-3 py-2 text-slate-200 transition hover:bg-slate-800 hover:text-lagoon" href="#/analytics">Analytics</a>
+      </nav>
+    </div>
   </header>
-  <main id="app"></main>
+  <main id="app" class="space-y-6"></main>
   <script type="module" src="/js/router.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/js/sw.js");}</script>
   <script type="module" src="/js/sync.js"></script>

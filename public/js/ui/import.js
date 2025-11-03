@@ -1,20 +1,28 @@
 
 import { apiPost } from '../api.js';
+import {
+  buttonPrimaryClass,
+  buttonSecondaryClass,
+  cardClass,
+  containerClass,
+  mutedTextClass,
+  sectionTitleClass
+} from './styles.js';
 
 export function viewImport(){
   const wrap = document.createElement('div');
-  wrap.className = 'container';
+  wrap.className = containerClass;
   const card = document.createElement('div');
-  card.className = 'card';
+  card.className = cardClass;
   card.innerHTML = `
-    <h2>Import (JSON)</h2>
-    <p>JSON-Datei mit Sessions wählen (Array von Sessions im Schema v1).</p>
-    <input type="file" id="f" accept=".json,application/json" />
-    <div style="margin-top:12px">
-      <button class="btn" id="preview">Preview</button>
-      <button class="btn" id="commit" style="margin-left:8px">Commit</button>
+    <h2 class="${sectionTitleClass}">Import (JSON)</h2>
+    <p class="${mutedTextClass}">JSON-Datei mit Sessions wählen (Array von Sessions im Schema v1).</p>
+    <input class="block w-full cursor-pointer rounded-xl border border-dashed border-slate-700 bg-slate-950/50 px-4 py-3 text-sm text-slate-200 file:mr-4 file:rounded-md file:border-0 file:bg-slate-800 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-slate-100 hover:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon/60" type="file" id="f" accept=".json,application/json" />
+    <div class="flex flex-wrap gap-3 pt-3">
+      <button class="${buttonPrimaryClass}" id="preview">Preview</button>
+      <button class="${buttonSecondaryClass}" id="commit">Commit</button>
     </div>
-    <pre id="out" style="margin-top:12px; white-space:pre-wrap;"></pre>
+    <pre id="out" class="mt-4 max-h-80 overflow-auto rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-lime-200"></pre>
   `;
   wrap.appendChild(card);
 

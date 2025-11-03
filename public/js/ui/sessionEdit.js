@@ -1,40 +1,58 @@
 
 import { apiGet, apiPost } from '../api.js';
 import { createSetEditor } from './components/setEditor.js';
+import {
+  buttonPrimaryClass,
+  buttonSecondaryClass,
+  cardClass,
+  containerClass,
+  inputClass,
+  sectionTitleClass,
+  selectClass,
+  textareaClass
+} from './styles.js';
 
 export async function viewSessionEdit(id){
   const el = document.createElement('div');
-  el.className = 'container';
+  el.className = containerClass;
   const card = document.createElement('div');
-  card.className = 'card';
-  card.innerHTML = `<h2>Session bearbeiten</h2><p>Lade...</p>`;
+  card.className = cardClass;
+  card.innerHTML = `<h2 class="${sectionTitleClass}">Session bearbeiten</h2><p class="text-sm text-slate-300">Lade...</p>`;
   el.appendChild(card);
 
   const s = await apiGet(`/api/sessions/${id}`);
 
   card.innerHTML = `
-    <h2>Session bearbeiten – ${s.id}</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div><label>Team ID<input id="teamId" value="${s.teamId||''}"></label></div>
-      <div><label>Datum<input id="date" value="${s.date||''}"></label></div>
-      <div><label>Uhrzeit<input id="time" value="${s.time||''}"></label></div>
-      <div><label>Ort<input id="location" value="${s.location||''}"></label></div>
-      <div><label>Beckenlänge (m)<input id="pool" type="number" value="${s.poolLength_m||25}"></label></div>
-      <div>
-        <label>Status
-          <select id="status">
-            ${['planned','in_progress','completed','locked'].map(v=>`<option ${s.status===v?'selected':''} value="${v}">${v}</option>`).join('')}
-          </select>
-        </label>
-      </div>
-      <div style="grid-column:1/-1">
-        <label>Coach-Notizen<textarea id="notes" rows="3">${s.notesCoach||''}</textarea></label>
-      </div>
-      <div style="grid-column:1/-1" id="editor-host"></div>
+    <h2 class="${sectionTitleClass}">Session bearbeiten – ${s.id}</h2>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="flex flex-col gap-2 text-sm font-medium text-slate-200">Team ID
+        <input class="${inputClass}" id="teamId" value="${s.teamId||''}">
+      </label>
+      <label class="flex flex-col gap-2 text-sm font-medium text-slate-200">Datum
+        <input class="${inputClass}" id="date" value="${s.date||''}">
+      </label>
+      <label class="flex flex-col gap-2 text-sm font-medium text-slate-200">Uhrzeit
+        <input class="${inputClass}" id="time" value="${s.time||''}">
+      </label>
+      <label class="flex flex-col gap-2 text-sm font-medium text-slate-200">Ort
+        <input class="${inputClass}" id="location" value="${s.location||''}">
+      </label>
+      <label class="flex flex-col gap-2 text-sm font-medium text-slate-200">Beckenlänge (m)
+        <input class="${inputClass}" id="pool" type="number" value="${s.poolLength_m||25}">
+      </label>
+      <label class="flex flex-col gap-2 text-sm font-medium text-slate-200">Status
+        <select class="${selectClass}" id="status">
+          ${['planned','in_progress','completed','locked'].map(v=>`<option ${s.status===v?'selected':''} value="${v}">${v}</option>`).join('')}
+        </select>
+      </label>
+      <label class="flex flex-col gap-2 text-sm font-medium text-slate-200 sm:col-span-2">Coach-Notizen
+        <textarea class="${textareaClass}" id="notes" rows="3">${s.notesCoach||''}</textarea>
+      </label>
+      <div class="sm:col-span-2 space-y-4" id="editor-host"></div>
     </div>
-    <div style="margin-top:12px">
-      <button class="btn" id="save">Speichern</button>
-      <a class="btn" href="#/session/${s.id}" style="margin-left:8px">Abbrechen</a>
+    <div class="flex flex-wrap gap-3 pt-2">
+      <button class="${buttonPrimaryClass}" id="save">Speichern</button>
+      <a class="${buttonSecondaryClass}" href="#/session/${s.id}">Abbrechen</a>
     </div>
   `;
 

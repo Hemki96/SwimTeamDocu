@@ -1,0 +1,22 @@
+const baseButton = 'inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
+const baseInput = 'rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon/60';
+
+export const containerClass = 'mx-auto w-full max-w-6xl space-y-6 px-4 py-6 sm:px-6 lg:py-8';
+export const cardClass = 'space-y-5 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-lg backdrop-blur-sm';
+export const sectionTitleClass = 'text-2xl font-semibold tracking-tight';
+export const mutedTextClass = 'text-sm text-slate-400';
+export const tableWrapperClass = 'overflow-hidden rounded-xl border border-slate-800 bg-slate-950/40';
+export const tableClass = 'min-w-full divide-y divide-slate-800 text-sm';
+export const tableHeadCellClass = 'bg-slate-900/70 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400';
+export const tableCellClass = 'px-4 py-3 text-sm text-slate-200';
+export const buttonPrimaryClass = `${baseButton} bg-lagoon px-4 py-2 text-sm text-slate-950 shadow hover:bg-teal-300 focus-visible:outline-lagoon disabled:cursor-not-allowed disabled:opacity-60`;
+export const buttonSmallClass = `${baseButton} bg-lagoon px-3 py-1.5 text-xs text-slate-950 shadow hover:bg-teal-300 focus-visible:outline-lagoon disabled:cursor-not-allowed disabled:opacity-60`;
+export const buttonSecondaryClass = `${baseButton} border border-slate-700 px-4 py-2 text-sm text-slate-100 hover:border-lagoon hover:text-lagoon focus-visible:outline-lagoon`;
+export const buttonSecondarySmallClass = `${baseButton} border border-slate-700 px-3 py-1.5 text-xs text-slate-100 hover:border-lagoon hover:text-lagoon focus-visible:outline-lagoon`;
+export const inputClass = `${baseInput} w-full`;
+export const inputInlineClass = baseInput;
+export const textareaClass = `${baseInput} w-full min-h-[120px]`;
+export const selectClass = `${baseInput} w-full pr-8`;
+export const selectInlineClass = `${baseInput} pr-8`;
+export const pillClass = 'inline-flex items-center gap-2 rounded-full bg-slate-800/80 px-3 py-1 text-xs font-medium text-slate-200';
+export const subtleCardClass = 'space-y-4 rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-sm';
