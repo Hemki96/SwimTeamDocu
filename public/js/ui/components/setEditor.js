@@ -1,3 +1,16 @@
+import {
+  buttonPrimaryClass,
+  buttonSecondarySmallClass,
+  buttonSmallClass,
+  inputInlineClass,
+  mutedTextClass,
+  selectInlineClass,
+  subtleCardClass,
+  tableCellClass,
+  tableClass,
+  tableHeadCellClass,
+  tableWrapperClass
+} from '../styles.js';
 
 /**
  * SetEditor: vanilla component for editing blocks & sets.
@@ -9,167 +22,169 @@
  */
 export function createSetEditor(initial = []){
   const el = document.createElement('div');
-  el.className = 'set-editor';
+  el.className = 'space-y-6';
 
-  function renderBlockRow(block, bIndex){
-    const wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <input class="block-name" value="${block.name||''}" placeholder="Blockname (z. B. Warm-up)" style="flex:1">
-        <button class="btn btn-small add-set">+ Set</button>
-        <button class="btn btn-small remove-block">Entfernen</button>
-      </div>
-      <table style="margin-top:8px">
-        <thead><tr><th>#</th><th>Wdh</th><th>Distanz (m)</th><th>Stil</th><th>Intensität</th><th>Pause (s)</th><th>Abgang (@m:ss)</th><th>Aktion</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    `;
-    const tbody = wrap.querySelector('tbody');
+  let blocks = (initial || []).map(block => ({
+    name: block?.name || '',
+    sets: (block?.sets || []).map(set => ({
+      reps: set?.reps,
+      distance_m: set?.distance_m,
+      stroke: set?.stroke || 'FR',
+      intensity: set?.intensity,
+      rest_s: set?.rest_s,
+      leave_at: set?.leave_at
+    }))
+  }));
 
-    function renderSetRow(set, sIndex){
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${sIndex+1}</td>
-        <td><input type="number" class="reps" min="1" value="${set.reps??''}" placeholder="z. B. 8" style="width:80px"></td>
-        <td><input type="number" class="dist" min="25" step="25" value="${set.distance_m??''}" placeholder="z. B. 50" style="width:100px"></td>
-        <td>
-          <select class="stroke">
-            ${['FR','BA','BR','FL','IM','DRILL'].map(v=>`<option ${set.stroke===v?'selected':''} value="${v}">${v}</option>`).join('')}
-          </select>
-        </td>
-        <td><input class="intensity" value="${set.intensity??''}" placeholder="EN1/EN2/TH/VO2/SP1..."></td>
-        <td><input type="number" class="rest" min="0" value="${set.rest_s??''}" placeholder="z. B. 20" style="width:100px"></td>
-        <td><input class="leave" value="${set.leave_at??''}" placeholder="@1:00" style="width:100px"></td>
-        <td><button class="btn btn-small remove-set">−</button></td>
-      `;
-      tr.querySelector('.remove-set').addEventListener('click', ()=>{
-        block.sets.splice(sIndex,1);
-        refresh();
-      });
-      tbody.appendChild(tr);
-    }
-
-    // initial sets
-    (block.sets||[]).forEach((s,i)=>renderSetRow(s,i));
-
-    wrap.querySelector('.add-set').addEventListener('click', ()=>{
-      block.sets = block.sets || [];
-      block.sets.push({ reps: 1, distance_m: 25, stroke: 'FR' });
-      refresh();
-    });
-    wrap.querySelector('.remove-block').addEventListener('click', ()=>{
-      blocks.splice(bIndex,1);
-      refresh();
-    });
-
-    return wrap;
+  function calcTotal(){
+    return blocks.reduce((total, block) => (
+      total + (block.sets || []).reduce((sum, set) => sum + (set.reps || 0) * (set.distance_m || 0), 0)
+    ), 0);
   }
 
-  let blocks = JSON.parse(JSON.stringify(initial||[]));
+  function updateTotal(){
+    const totalEl = el.querySelector('[data-total]');
+    if(totalEl) totalEl.textContent = `Gesamt: ${calcTotal()} m`;
+  }
 
-  function refresh(){
-    el.innerHTML = "";
+  function render(){
+    el.innerHTML = '';
     const head = document.createElement('div');
-    head.style.display = 'flex';
-    head.style.justifyContent = 'space-between';
-    head.style.alignItems = 'center';
-    head.style.gap = '8px';
+    head.className = 'flex flex-wrap items-start justify-between gap-4';
     head.innerHTML = `
-      <h3 style="margin:8px 0">Blöcke & Sets</h3>
-      <div style="display:flex;gap:8px">
-        <button class="btn add-block">+ Block</button>
-        <span id="total" class="muted"></span>
+      <div>
+        <h3 class="text-xl font-semibold text-slate-100">Blöcke &amp; Sets</h3>
+        <p class="${mutedTextClass}">Strukturiere den Ablauf deiner Einheit.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="${mutedTextClass}" data-total>Gesamt: ${calcTotal()} m</span>
+        <button type="button" class="${buttonPrimaryClass} add-block">+ Block</button>
       </div>
     `;
     el.appendChild(head);
 
-    blocks.forEach((b, idx)=>{
-      const blockEl = renderBlockRow(b, idx);
-      el.appendChild(blockEl);
-      // render its sets now
-      const tbody = blockEl.querySelector('tbody');
-      (b.sets||[]).forEach((s,i)=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${i+1}</td>
-          <td><input type="number" class="reps" min="1" value="${s.reps??''}" style="width:80px"></td>
-          <td><input type="number" class="dist" min="25" step="25" value="${s.distance_m??''}" style="width:100px"></td>
-          <td>
-            <select class="stroke">
-              ${['FR','BA','BR','FL','IM','DRILL'].map(v=>`<option ${s.stroke===v?'selected':''} value="${v}">${v}</option>`).join('')}
-            </select>
-          </td>
-          <td><input class="intensity" value="${s.intensity??''}"></td>
-          <td><input type="number" class="rest" min="0" value="${s.rest_s??''}" style="width:100px"></td>
-          <td><input class="leave" value="${s.leave_at??''}" placeholder="@1:00" style="width:100px"></td>
-          <td><button class="btn btn-small remove-set">−</button></td>
-        `;
-        tr.querySelector('.remove-set').addEventListener('click', ()=>{
-          b.sets.splice(i,1);
-          refresh();
-        });
-        tbody.appendChild(tr);
-      });
-
-      // keep block name two-way binding
-      blockEl.querySelector('.block-name').addEventListener('input', (e)=>{
-        b.name = e.target.value;
-      });
-    });
-
     head.querySelector('.add-block').addEventListener('click', ()=>{
       blocks.push({ name: 'Neuer Block', sets: [] });
-      refresh();
+      render();
     });
 
-    // total meters
-    const total = blocks.reduce((m,b)=>m+(b.sets||[]).reduce((x,s)=>x+(s.reps||0)*(s.distance_m||0),0),0);
-    head.querySelector('#total').textContent = `Gesamt: ${total} m`;
+    blocks.forEach((block, index)=>{
+      const wrap = document.createElement('div');
+      wrap.className = `${subtleCardClass} space-y-4`;
+      wrap.dataset.block = String(index);
+
+      const sets = block.sets || [];
+      const rows = sets.length ? sets.map((set, sIndex)=>`
+        <tr class="hover:bg-slate-900/40" data-set="${sIndex}">
+          <td class="${tableCellClass}">${sIndex+1}</td>
+          <td class="${tableCellClass}"><input class="${inputInlineClass} reps w-20 text-sm" type="number" min="1" value="${set.reps ?? ''}" placeholder="z. B. 8"></td>
+          <td class="${tableCellClass}"><input class="${inputInlineClass} dist w-24 text-sm" type="number" min="25" step="25" value="${set.distance_m ?? ''}" placeholder="z. B. 50"></td>
+          <td class="${tableCellClass}">
+            <select class="${selectInlineClass} stroke w-28 text-sm">
+              ${['FR','BA','BR','FL','IM','DRILL'].map(v=>`<option ${set.stroke===v?'selected':''} value="${v}">${v}</option>`).join('')}
+            </select>
+          </td>
+          <td class="${tableCellClass}"><input class="${inputInlineClass} intensity w-32 text-sm" value="${set.intensity ?? ''}" placeholder="EN1/EN2/TH..."></td>
+          <td class="${tableCellClass}"><input class="${inputInlineClass} rest w-24 text-sm" type="number" min="0" value="${set.rest_s ?? ''}" placeholder="z. B. 20"></td>
+          <td class="${tableCellClass}"><input class="${inputInlineClass} leave w-24 text-sm" value="${set.leave_at ?? ''}" placeholder="@1:00"></td>
+          <td class="${tableCellClass}"><button type="button" class="${buttonSecondarySmallClass} remove-set">−</button></td>
+        </tr>
+      `).join('') : `<tr><td class="${tableCellClass} text-center text-slate-400" colspan="8">Noch keine Sets hinzugefügt.</td></tr>`;
+
+      wrap.innerHTML = `
+        <div class="flex flex-wrap items-center gap-3">
+          <input class="${inputInlineClass} block-name flex-1 min-w-[180px]" value="${block.name || ''}" placeholder="Blockname (z. B. Warm-up)">
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="${buttonSmallClass} add-set">+ Set</button>
+            <button type="button" class="${buttonSecondarySmallClass} remove-block">Entfernen</button>
+          </div>
+        </div>
+        <div class="${tableWrapperClass}">
+          <table class="${tableClass}">
+            <thead>
+              <tr>
+                <th class="${tableHeadCellClass}">#</th>
+                <th class="${tableHeadCellClass}">Wdh</th>
+                <th class="${tableHeadCellClass}">Distanz (m)</th>
+                <th class="${tableHeadCellClass}">Stil</th>
+                <th class="${tableHeadCellClass}">Intensität</th>
+                <th class="${tableHeadCellClass}">Pause (s)</th>
+                <th class="${tableHeadCellClass}">Abgang</th>
+                <th class="${tableHeadCellClass}">Aktion</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">${rows}</tbody>
+          </table>
+        </div>
+      `;
+
+      el.appendChild(wrap);
+
+      wrap.querySelector('.block-name').addEventListener('input', (e)=>{
+        block.name = e.target.value;
+      });
+
+      wrap.querySelector('.add-set').addEventListener('click', ()=>{
+        block.sets = block.sets || [];
+        block.sets.push({ reps: 1, distance_m: 25, stroke: 'FR' });
+        render();
+      });
+
+      wrap.querySelector('.remove-block').addEventListener('click', ()=>{
+        blocks.splice(index, 1);
+        render();
+      });
+
+      wrap.querySelectorAll('tbody tr[data-set]').forEach(tr => {
+        const sIndex = parseInt(tr.dataset.set, 10);
+        const set = block.sets[sIndex];
+        tr.querySelector('.remove-set')?.addEventListener('click', ()=>{
+          block.sets.splice(sIndex,1);
+          render();
+        });
+        tr.querySelector('.reps')?.addEventListener('input', (e)=>{ set.reps = intOrUndef(e.target.value); updateTotal(); });
+        tr.querySelector('.dist')?.addEventListener('input', (e)=>{ set.distance_m = intOrUndef(e.target.value); updateTotal(); });
+        tr.querySelector('.stroke')?.addEventListener('change', (e)=>{ set.stroke = e.target.value; });
+        tr.querySelector('.intensity')?.addEventListener('input', (e)=>{ set.intensity = strOrUndef(e.target.value); });
+        tr.querySelector('.rest')?.addEventListener('input', (e)=>{ set.rest_s = intOrUndef(e.target.value); });
+        tr.querySelector('.leave')?.addEventListener('input', (e)=>{ set.leave_at = strOrUndef(e.target.value); });
+      });
+    });
+
+    updateTotal();
   }
 
-  refresh();
+  render();
 
   function collect(){
-    // read back values from DOM into blocks
-    const cards = el.querySelectorAll('.card');
-    let bi = 0;
-    for(const card of cards){
-      const nameInput = card.querySelector('.block-name');
-      if (!nameInput) continue;
-      const b = blocks[bi++];
-      b.name = nameInput.value || '';
-      const rows = card.querySelectorAll('tbody tr');
-      b.sets = [];
-      rows.forEach(r=>{
-        b.sets.push({
-          reps: intOrUndef(r.querySelector('.reps')?.value),
-          distance_m: intOrUndef(r.querySelector('.dist')?.value),
-          stroke: r.querySelector('.stroke')?.value || 'FR',
-          intensity: strOrUndef(r.querySelector('.intensity')?.value),
-          rest_s: intOrUndef(r.querySelector('.rest')?.value),
-          leave_at: strOrUndef(r.querySelector('.leave')?.value)
-        });
-      });
-    }
-    return blocks;
+    return blocks.map(block => ({
+      name: block.name || '',
+      sets: (block.sets || []).map(set => ({
+        reps: set.reps,
+        distance_m: set.distance_m,
+        stroke: set.stroke || 'FR',
+        intensity: set.intensity,
+        rest_s: set.rest_s,
+        leave_at: set.leave_at
+      }))
+    }));
   }
 
-  function intOrUndef(v){ const n = parseInt(v||''); return Number.isFinite(n)?n:undefined; }
+  function intOrUndef(v){ const n = parseInt(v || ''); return Number.isFinite(n) ? n : undefined; }
   function strOrUndef(v){ return (v && v.trim().length) ? v.trim() : undefined; }
 
   function validate(){
     const errors = [];
-    const blocks = collect();
-    blocks.forEach((b, bi)=>{
-      if(!b.name) errors.push(`Block ${bi+1}: Name fehlt`);
-      (b.sets||[]).forEach((s, si)=>{
-        if(!Number.isFinite(s.reps) || s.reps < 1) errors.push(`Block ${bi+1} Set ${si+1}: Wdh fehlt/ungültig`);
-        if(!Number.isFinite(s.distance_m) || (s.distance_m % 25) !== 0) errors.push(`Block ${bi+1} Set ${si+1}: Distanz muss Vielfaches von 25 sein`);
-        if(s.leave_at && !/^@\d{1,2}:\d{2}$/.test(s.leave_at)) errors.push(`Block ${bi+1} Set ${si+1}: Abgang-Format @m:ss`);
+    const data = collect();
+    data.forEach((block, bi)=>{
+      if(!block.name) errors.push(`Block ${bi+1}: Name fehlt`);
+      (block.sets || []).forEach((set, si)=>{
+        if(!Number.isFinite(set.reps) || set.reps < 1) errors.push(`Block ${bi+1} Set ${si+1}: Wdh fehlt/ungültig`);
+        if(!Number.isFinite(set.distance_m) || (set.distance_m % 25) !== 0) errors.push(`Block ${bi+1} Set ${si+1}: Distanz muss Vielfaches von 25 sein`);
+        if(set.leave_at && !/^@\d{1,2}:\d{2}$/.test(set.leave_at)) errors.push(`Block ${bi+1} Set ${si+1}: Abgang-Format @m:ss`);
       });
     });
-    return { ok: errors.length===0, errors };
+    return { ok: errors.length === 0, errors };
   }
 
   return { el, getValue: collect, validate };
