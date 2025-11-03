@@ -1,0 +1,9 @@
+
+# Regel-Engine (Beispiele)
+warnings:
+  - id: ACWR_HIGH
+    when: acwr > 1.5
+    message: "ACWR über 1.5 – erhöhte Belastungsrisiken."
+  - id: ABSENCE_SERIES
+    when: consecutive_absences >= 3 within 14d
+    message: "3 Abwesenheiten in 14 Tagen – Gespräch empfehlen."

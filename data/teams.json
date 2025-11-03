@@ -1,0 +1,10 @@
+[
+  {
+    "id": "TEAM-A",
+    "name": "1. Mannschaft",
+    "clubId": "CLUB-1",
+    "coachUserIds": [
+      "U-1"
+    ]
+  }
+]

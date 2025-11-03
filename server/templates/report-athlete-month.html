@@ -1,0 +1,104 @@
+
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Athlet-Report ({{ATHLETE}}) – {{MONTH}}</title>
+  <style>
+    body{font:14px/1.4 -apple-system,system-ui,Segoe UI,Roboto,Arial;padding:24px;color:#111}
+    h1{font-size:20px;margin:0 0 8px}
+    h2{font-size:16px;margin:16px 0 8px;color:#333}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}
+    th{background:#f2f2f2}
+    .meta{color:#555;font-size:12px}
+    .row{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+    .card{border:1px solid #ddd;border-radius:8px;padding:12px;flex:1;min-width:280px}
+  </style>
+</head>
+<body>
+  <h1>Athleten-Monatsreport – {{ATHLETE}}</h1>
+  <div class="meta">Monat: {{MONTH}} • Team: {{TEAM}} • Generiert: <script>document.write(new Date().toLocaleString())</script></div>
+
+  <div class="row">
+    <div class="card">
+      <h2>KPIs</h2>
+      <ul>
+        <li>Teilnahmen (Sessions): <strong id="kpi-sessions"></strong></li>
+        <li>Gesamtmeter: <strong id="kpi-meters"></strong> m</li>
+        <li>Ø RPE: <strong id="kpi-rpe"></strong></li>
+        <li>Anwesenheit: <strong id="kpi-attend"></strong>%</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Stil-Verteilung</h2>
+      <ul id="kpi-strokes"></ul>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:16px">
+    <div class="card"><h2>Metrik-Verlauf (Tage)</h2><canvas id="chartMeters" width="640" height="320"></canvas></div>
+    <div class="card"><h2>RPE-Verlauf</h2><canvas id="chartRPE" width="640" height="320"></canvas></div>
+  </div>
+
+  <h2>Monatsübersicht</h2>
+  <table>
+    <thead><tr><th>Datum</th><th>Session</th><th>Ort</th><th>Status</th><th>Meter</th><th>RPE</th></tr></thead>
+    <tbody>
+      {{ROWS}}
+    </tbody>
+  </table>
+
+  <script>
+    const DATA = {{DATA_JSON}};
+
+    // KPIs
+    document.getElementById('kpi-sessions').textContent = DATA.sessions;
+    document.getElementById('kpi-meters').textContent = DATA.total_meters.toLocaleString('de-DE');
+    document.getElementById('kpi-attend').textContent = Math.round((DATA.attendance_rate||0)*100);
+    document.getElementById('kpi-rpe').textContent = (DATA.avg_rpe||0).toFixed(1);
+
+    const strokeUl = document.getElementById('kpi-strokes');
+    Object.entries(DATA.stroke_dist || {}).forEach(([k,v])=>{
+      const li = document.createElement('li');
+      li.textContent = `${k}: ${v} m`;
+      strokeUl.appendChild(li);
+    });
+
+    // Charts (Vanilla Canvas)
+    function lineChart(canvas, labels, values){
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0,0,W,H);
+      const padding = 30;
+      const max = Math.max(...values, 1);
+      // axes
+      ctx.strokeStyle = '#333'; ctx.beginPath();
+      ctx.moveTo(padding, H - padding); ctx.lineTo(W - padding, H - padding);
+      ctx.moveTo(padding, H - padding); ctx.lineTo(padding, padding);
+      ctx.stroke();
+      // scale
+      const stepX = (W - padding*2) / Math.max(values.length-1, 1);
+      ctx.strokeStyle = '#4e79a7'; ctx.beginPath();
+      values.forEach((v,i)=>{
+        const x = padding + i*stepX;
+        const y = H - padding - ( (H - padding*2) * (v/max) );
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+      // labels (x)
+      ctx.fillStyle = '#000'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+      labels.forEach((lb,i)=>{
+        const x = padding + i*stepX;
+        ctx.fillText(lb, x, H - padding + 14);
+      });
+    }
+
+    const labels = DATA.days.map(d=>d.day);
+    const meters = DATA.days.map(d=>d.meters);
+    const rpes = DATA.days.map(d=>d.rpe || 0);
+    lineChart(document.getElementById('chartMeters'), labels, meters);
+    lineChart(document.getElementById('chartRPE'), labels, rpes);
+  </script>
+</body>
+</html>

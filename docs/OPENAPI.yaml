@@ -1,0 +1,28 @@
+
+openapi: 3.0.3
+info:
+  title: Swim Training Docs API
+  version: 0.1.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/sessions:
+    get:
+      summary: List sessions
+      parameters:
+        - in: query
+          name: teamId
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+  /api/sessions/{id}:
+    get:
+      summary: Get session
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }

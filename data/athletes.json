@@ -1,0 +1,15 @@
+[
+  {
+    "id": "A-101",
+    "name": "Lias K\u00fchne",
+    "birthYear": 2010,
+    "gender": "m",
+    "teams": [
+      "TEAM-A"
+    ],
+    "consents": {
+      "media": true,
+      "analytics": true
+    }
+  }
+]

@@ -1,0 +1,120 @@
+{
+  "$id": "https://example.com/schemas/swim-session.v1.json",
+  "type": "object",
+  "required": [
+    "sessionId",
+    "date",
+    "time",
+    "location",
+    "blocks",
+    "teamId"
+  ],
+  "properties": {
+    "sessionId": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string",
+      "pattern": "^[0-2]\\d:[0-5]\\d$"
+    },
+    "location": {
+      "type": "string"
+    },
+    "poolLength_m": {
+      "type": "integer",
+      "enum": [
+        25,
+        50
+      ]
+    },
+    "coach": {
+      "type": "string"
+    },
+    "teamId": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "in_progress",
+        "completed",
+        "locked"
+      ]
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "sets"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "sets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "reps",
+                "distance_m",
+                "stroke"
+              ],
+              "properties": {
+                "reps": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "distance_m": {
+                  "type": "integer",
+                  "multipleOf": 25
+                },
+                "stroke": {
+                  "type": "string",
+                  "enum": [
+                    "FR",
+                    "BA",
+                    "BR",
+                    "FL",
+                    "IM",
+                    "DRILL"
+                  ]
+                },
+                "intensity": {
+                  "type": "string"
+                },
+                "rest_s": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "leave_at": {
+                  "type": "string",
+                  "pattern": "^@\\d{1,2}:\\d{2}$"
+                },
+                "equipment": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "S-EXAMPLE",
+  "teamId": "TEAM-A",
+  "date": "2025-11-03",
+  "time": "17:30",
+  "location": "Hallenbad Siegburg",
+  "poolLength_m": 25,
+  "coach": "C. Hemker",
+  "status": "planned",
+  "blocks": [
+    {
+      "name": "Main",
+      "sets": [
+        {
+          "reps": 8,
+          "distance_m": 50,
+          "stroke": "FL",
+          "intensity": "SP1",
+          "leave_at": "@1:00"
+        }
+      ]
+    }
+  ],
+  "notesCoach": ""
+}

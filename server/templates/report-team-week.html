@@ -1,0 +1,125 @@
+
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Team-Report ({{TEAM}}) – {{PERIOD}}</title>
+  <style>
+    body{font:14px/1.4 -apple-system,system-ui,Segoe UI,Roboto,Arial;padding:24px;color:#111}
+    h1{font-size:20px;margin:0 0 8px}
+    h2{font-size:16px;margin:16px 0 8px;color:#333}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}
+    th{background:#f2f2f2}
+    .meta{color:#555;font-size:12px}
+    .row{display:flex;gap:16px;align-items:flex-start}
+    .card{border:1px solid #ddd;border-radius:8px;padding:12px;flex:1}
+  </style>
+</head>
+<body>
+  <h1>Team-Report – {{TEAM}}</h1>
+  <div class="meta">Zeitraum: {{PERIOD}} • Generiert: <script>document.write(new Date().toLocaleString())</script></div>
+
+  <div class="row">
+    <div class="card">
+      <h2>KPIs</h2>
+      <ul>
+        <li>Sessions: <strong id="kpi-sessions"></strong></li>
+        <li>Gesamtmeter (geschätzt): <strong id="kpi-meters"></strong> m</li>
+        <li>Anwesenheitsquote: <strong id="kpi-attend"></strong>%</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Stil-Verteilung</h2>
+      <ul id="kpi-strokes"></ul>
+    </div>
+  </div>
+
+  <h2>Einheiten</h2>
+  <table>
+    <thead><tr><th>Datum</th><th>Uhrzeit</th><th>Ort</th><th>Status</th><th>Gesamtmeter</th></tr></thead>
+    <tbody>
+      {{ROWS}}
+    </tbody>
+  </table>
+
+  <div class="row" style="margin-top:16px">
+    <div class="card"><h2>Meter pro Einheit</h2><canvas id="chartMeters" width="640" height="320"></canvas></div>
+    <div class="card"><h2>Anwesenheit</h2><canvas id="chartAttend" width="320" height="320"></canvas></div>
+  </div>
+
+  <script>
+  const DATA = {{DATA_JSON}};
+
+  // KPIs
+  document.getElementById('kpi-sessions').textContent = DATA.sessions;
+  document.getElementById('kpi-meters').textContent = DATA.estimated_distance_m.toLocaleString('de-DE');
+  document.getElementById('kpi-attend').textContent = Math.round((DATA.attendance_rate||0)*100);
+
+  const strokeUl = document.getElementById('kpi-strokes');
+  Object.entries(DATA.stroke_dist || {}).forEach(([k,v])=>{
+    const li = document.createElement('li');
+    li.textContent = `${k}: ${v} m`;
+    strokeUl.appendChild(li);
+  });
+
+  // Simple charts with vanilla Canvas 2D (no external libs)
+  function barChart(canvas, labels, values){
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const max = Math.max(...values, 1);
+    const padding = 30;
+    const barW = (W - padding*2) / values.length;
+    // axes
+    ctx.strokeStyle = '#333'; ctx.beginPath();
+    ctx.moveTo(padding, H - padding); ctx.lineTo(W - padding, H - padding);
+    ctx.moveTo(padding, H - padding); ctx.lineTo(padding, padding);
+    ctx.stroke();
+    // bars
+    ctx.fillStyle = '#4e79a7';
+    values.forEach((v,i)=>{
+      const x = padding + i*barW + 4;
+      const h = (H - padding*2) * (v/max);
+      const y = H - padding - h;
+      ctx.fillRect(x, y, barW - 8, h);
+    });
+    // labels (x)
+    ctx.fillStyle = '#000'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+    labels.forEach((lb,i)=>{
+      const x = padding + i*barW + (barW/2);
+      ctx.fillText(lb, x, H - padding + 14);
+    });
+  }
+
+  function pieChart(canvas, values){
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const total = values.reduce((a,b)=>a+b,0) || 1;
+    const cx = W/2, cy = H/2, r = Math.min(W,H)/2 - 10;
+    const colors = ['#4e79a7','#59a14f','#e15759'];
+    let start = 0;
+    values.forEach((v,i)=>{
+      const ang = (v/total) * Math.PI*2;
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,r,start,start+ang);
+      ctx.closePath();
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fill();
+      start += ang;
+    });
+  }
+
+  // Data for charts
+  const labels = DATA.session_list.map(s=>s.date);
+  const meters = DATA.session_list.map(s=>s.meters);
+  barChart(document.getElementById('chartMeters'), labels, meters);
+
+  const present = Math.round((DATA.attendance_rate||0) * 100);
+  const absent = 100 - present;
+  pieChart(document.getElementById('chartAttend'), [present, absent]);
+  </script>
+</body>
+</html>
